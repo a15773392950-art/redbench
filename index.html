@@ -809,11 +809,19 @@ function openWorkView(card) {
   placeholder.textContent = '加载图片...';
 
   function showLoadedPhotos() {
-    carouselImages = (w && w.photos) ? w.photos : [];
+    var photoList = (w && w.photos) ? w.photos : [];
+    /* Prepend cover image (firstimage) as first carousel image */
+    carouselImages = (w && w.cover) ? [w.cover].concat(photoList) : photoList;
     if (carouselImages.length > 0) {
       placeholder.style.display = 'none';
       var img = document.createElement('img');
       img.src = carouselImages[0];
+       /* Fallback: try alternate extension if cover fails to load */
+      img.onerror = function() {
+        var s = img.src;
+        if (s.endsWith('.png')) { img.onerror = null; img.src = s.slice(0, -4) + '.jpg'; }
+        else if (s.endsWith('.jpg')) { img.onerror = null; img.src = s.slice(0, -4) + '.png'; }
+      };
       workCarousel.insertBefore(img, workCarousel.firstChild);
       startCarousel();
     } else {
